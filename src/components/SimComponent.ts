@@ -19,7 +19,6 @@ export class SimComponent<P = any, S = any> extends Component<P, S>{
     // }
 
     protected boot() {
-        // console.log('----proep----', Object.getPrototypeOf(this))
         const constructor = Object.getPrototypeOf(this).constructor;
         const statePropertys = Reflect.getMetadata(StateMetadataKey, constructor) as string[] | undefined
         if (statePropertys) {
@@ -45,6 +44,11 @@ export class SimComponent<P = any, S = any> extends Component<P, S>{
                 (this as any)[it] =   (this as any)[it].bind(this);
             })
         }
+
+        const a = Reflect.getMetadata('design:paramtypes', this)
+        const b = Reflect.getMetadata('design:paramtypes', constructor)
+        console.log('------->', a, b)
+
 
 
 

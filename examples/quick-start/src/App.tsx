@@ -3,6 +3,9 @@ import './App.css';
 import {SimComponent} from 'simple-boot-react/components/SimComponent';
 import {State} from 'simple-boot-react/decorators/State';
 import {Bind} from 'simple-boot-react/decorators/Bind';
+import {Injectable, InjectableMetadataKey} from 'simple-boot-react/decorators/Injectable';
+
+@Injectable()
 class Apps extends SimComponent {
     @State
     name = 'name'
@@ -28,5 +31,26 @@ class Apps extends SimComponent {
         );
     }
 }
+declare function f1(arg: { a: number; b: string }): void;
+
+// type T0 = Parameters<() => string>;
+//
+// type T0 = []
+// type T1 = Parameters<(s: string) => void>;
+// console.log('----------', Parameters<(s: string) => void>)
+// type T1 = [s: string]
+// type T2 = Parameters<<T>(arg: T) => T>;
+//
+// type T2 = [arg: unknown]
+// type T3 = Parameters<typeof f1>;
+//
+// type T3 = [arg: {
+//     a: number;
+//     b: string;
+// }]
+// type T4 = Parameters<any>;
+//
+// type T4 = unknown[]
+// type T5 = Parameters<never>;
 
 export default Apps;
