@@ -31,7 +31,6 @@
     "reflect-metadata": "^0.1.13"
   },
   "workspaces": [
-    "libs/simple-boot-core/dist"
   ],
   "bugs": {
     "url": "https://github.com/visualkhh/simple-boot-react/issues"

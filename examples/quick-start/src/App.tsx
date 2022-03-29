@@ -3,9 +3,7 @@ import './App.css';
 import {SimComponent} from 'simple-boot-react/components/SimComponent';
 import {State} from 'simple-boot-react/decorators/State';
 import {Bind} from 'simple-boot-react/decorators/Bind';
-import {Injectable, InjectableMetadataKey} from 'simple-boot-react/decorators/Injectable';
 
-@Injectable()
 class Apps extends SimComponent {
     @State
     name = 'name'
