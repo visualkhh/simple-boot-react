@@ -1,13 +1,13 @@
-import {Component, Dispatch, ReactNode, SetStateAction} from 'react';
+import {Component, Dispatch, ReactNode, SetStateAction, useContext} from 'react';
 import 'reflect-metadata'
 import {GetStates, StateMetadataKey, StateSaveConfig} from '../decorators/State';
 import {BindMetadataKey, GetBinds} from '../decorators/Bind';
-// import {SimOption} from 'simple-boot-core/SimOption';
-// SimOption
+import simpleboot from '../index';
 export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS>{
     // private __isBoot = false;
     constructor(props: P) {
         super(props);
+        // SimComponent.manager();
     }
 
     // shouldComponentUpdate() {
@@ -96,7 +96,6 @@ export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS
         // this.__isBoot = true;
     }
 
-
     private beforeRender() {
         // console.log('--->', 'beforeRender', this)
     }
@@ -118,10 +117,14 @@ export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS
         return true;
     }
     private beforeComponentWillUnmount() {
-        GetStates(this).filter(it => it.config.unMount).forEach(it => {
+        GetStates(this).filter(it => it.config.unmount).forEach(it => {
             const current = (this.state as any)[it.propertyKey];
-            (this as any)[it.config.unMount!]?.(current);
+            (this as any)[it.config.unmount!]?.(current);
         })
         // console.log('--->', 'beforeComponentWillUnmount')
+    }
+    get manager() {
+        console.log('-------mo', simpleboot)
+        return simpleboot ;
     }
 }

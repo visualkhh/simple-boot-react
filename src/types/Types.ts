@@ -1,3 +1,5 @@
+import {ReactChild, ReactChildren} from 'react';
+
 export interface ConstructorType<T> {
     new(...args: any[]): T;
 }
@@ -8,3 +10,10 @@ export type MethodParameter = (target: Object, propertyKey: string | symbol, par
 
 
 export type KeysWithValsOfType<T,V> = keyof { [ P in keyof T as T[P] extends V ? P : never ] : P };
+
+export type PropType<T> = {
+    [P in keyof T]: T[P];
+} & {
+    children?: ReactChild[];
+}
+    // children?: ReactChildren;

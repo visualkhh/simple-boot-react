@@ -6,7 +6,7 @@ export const StateMetadataKey = Symbol('StateMetadataKey');
 
 export type StateConfig<T = any> = {
     updated?: Exclude<KeysWithValsOfType<T, Function>, keyof Component>;
-    unMount?: Exclude<KeysWithValsOfType<T, Function>, keyof Component>;
+    unmount?: Exclude<KeysWithValsOfType<T, Function>, keyof Component>;
 }
 // export type StateConfig<T = any> = { update?: Exclude<KeysWithValsOfType<T, Function>, keyof Component> }
 

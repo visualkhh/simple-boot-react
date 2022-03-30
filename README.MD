@@ -71,7 +71,7 @@ type Subjection = {
     unsubscribe(): void;
 }
 class User extends SimComponent {
-    @State<User>({unMount: 'unsubscribe'})
+    @State<User>({unmount: 'unsubscribe'})
     subjection:Subjection = {
         subscribe(callback: (state: any) => void) {
             console.log('User subscribe');
