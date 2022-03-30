@@ -3,52 +3,77 @@ import './App.css';
 import {SimComponent} from 'simple-boot-react/components/SimComponent';
 import {State} from 'simple-boot-react/decorators/State';
 import {Bind} from 'simple-boot-react/decorators/Bind';
-
-class Apps extends SimComponent {
-    @State
-    name = 'name'
-    @State
-    time = new Date().toISOString();
+type Subjection = {
+    subscribe(callback: (state: any) => void): void;
+    unsubscribe(): void;
+}
+class User extends SimComponent {
+    @State<User>({unMount: 'unsubscribe'})
+    subjection:Subjection = {
+        subscribe(callback: (state: any) => void) {
+            console.log('User subscribe');
+        },
+        unsubscribe() {
+            console.log('User unsubscribe');
+        }
+    }
     constructor(props: any) {
         super(props);
         super.boot();
+        console.log('User constructor')
+        this.subjection.subscribe(()=>{})
+    }
+    render() {
+        return <div>user</div>;
+    }
+
+    unsubscribe(subjection:Subjection) {
+        subjection.unsubscribe();
+    }
+}
+
+
+class Apps extends SimComponent {
+    @State()
+    name = 'name'
+    @State<Apps>({updated: 'changeToggle'})
+    toggle = true
+    @State<Apps>({updated: 'changeTime'})
+    time = new Date().toISOString();
+    ref = React.createRef<HTMLDivElement>();
+    constructor(props: any) {
+        super(props);
+        super.boot();
+        console.log('Apps constructor');
+    }
+
+    changeToggle(prev: boolean, current: boolean) {
+        console.log('changeToggle', prev, current);
+    }
+
+    changeTime(prev: boolean, current: boolean) {
+        console.log('changeTime', prev, current);
     }
 
     @Bind
-    changeAge() {
+    clickChangeTime() {
+        console.log('------bind this', this)
         this.time = new Date().toISOString()
+        console.log('-->', this.ref.current)
     }
+
     render() {
         return (
             <div>
                 <div>name: {this.name}</div>
                 <div>time: {this.time}</div>
-                <button onClick={()=>{this.name='change name!!'}}>change</button>
-                <button onClick={this.changeAge}>bind change</button>
+                {this.toggle ? <User></User> : null}
+                <button onClick={()=>{console.log('changename', this); this.name='change name!!'}}>change</button>
+                <button onClick={this.clickChangeTime}>bind change</button>
+                <button onClick={() => {this.toggle = !this.toggle} }>toggle component</button>
             </div>
         );
     }
 }
-declare function f1(arg: { a: number; b: string }): void;
-
-// type T0 = Parameters<() => string>;
-//
-// type T0 = []
-// type T1 = Parameters<(s: string) => void>;
-// console.log('----------', Parameters<(s: string) => void>)
-// type T1 = [s: string]
-// type T2 = Parameters<<T>(arg: T) => T>;
-//
-// type T2 = [arg: unknown]
-// type T3 = Parameters<typeof f1>;
-//
-// type T3 = [arg: {
-//     a: number;
-//     b: string;
-// }]
-// type T4 = Parameters<any>;
-//
-// type T4 = unknown[]
-// type T5 = Parameters<never>;
 
 export default Apps;
