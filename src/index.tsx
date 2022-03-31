@@ -1,11 +1,16 @@
 import {ConstructorType} from './types/Types';
 import React from 'react';
 
+export type SimConfig = {
+    name?: string;
+    factory?: [ConstructorType<any>, (simpleboot: SimpleBoot) => void][]
+
+}
 export class SimpleBoot {
     name = 'SimpleBoot';
     private instance = new Map<ConstructorType<any>, any>();
 
-    constructor({name = 'SimpleBoot'}: {name?: string} = {}) {
+    constructor({name = 'SimpleBoot'}: SimConfig = {}) {
         this.name = name;
     }
 
