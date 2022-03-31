@@ -1,4 +1,4 @@
-import React, {Props, useRef} from 'react';
+import React, {Component, Props, useRef} from 'react';
 import './App.css';
 import {SimComponent} from 'simple-boot-react/components/SimComponent';
 import {State} from 'simple-boot-react/decorators/State';
@@ -6,6 +6,7 @@ import {Bind} from 'simple-boot-react/decorators/Bind';
 import {PropType} from '../../../src/types/Types';
 import {UserService} from './services/UserService';
 import {ProjectService} from './services/ProjectService';
+import {SimContext, SimpleBoot} from 'simple-boot-react';
 type Subjection = {
     subscribe(callback: (state: any) => void): void;
     unsubscribe(): void;
@@ -32,6 +33,7 @@ class User extends SimComponent {
         this.subjection.subscribe(()=>{})
     }
     render() {
+        console.log('user-redner->', super.sb());
         return <div>user</div>;
     }
 
@@ -73,9 +75,11 @@ class App extends SimComponent {
     }
 
     render() {
-        this.manager.get(UserService).say();
-        this.manager.get(UserService).say();
-        this.manager.get(ProjectService).say();
+        super.sb()?.get(UserService).say();
+        console.log('app-redner->', super.sb());
+        // this.manager.get(UserService).say();
+        // this.manager.get(UserService).say();
+        // this.manager.get(ProjectService).say();
         // const FancyButton = React.forwardRef((props, ref) => (
         //     <User ref={ref}>asd</User>
         // ));
@@ -87,8 +91,6 @@ class App extends SimComponent {
             <div>
                 <div>name: {this.name}</div>
                 <div>time: {this.time}</div>
-                {/*{this.toggle ? <User><div>11</div> <div>dd</div></User> : null}*/}
-                {/*{this.toggle ? <User>xxx</User> : null}*/}
                 {this.toggle ? <User><div/>22</User> : null}
                 <button onClick={()=>{console.log('changename', this); this.name='change name!!'}}>change</button>
                 <button onClick={this.clickChangeTime}>bind change</button>
@@ -97,5 +99,8 @@ class App extends SimComponent {
         );
     }
 }
-
+// console.log('app------1?', App, (App as any).contextType, SimContext);
+// (App as any).contextType = SimContext;
+// console.log('app------2?', App, (App as any).contextType, SimContext);
+// App.contextType = SimContext;
 export default App;

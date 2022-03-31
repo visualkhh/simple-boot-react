@@ -2,7 +2,7 @@ import {Component, Dispatch, ReactNode, SetStateAction, useContext} from 'react'
 import 'reflect-metadata'
 import {GetStates, StateMetadataKey, StateSaveConfig} from '../decorators/State';
 import {BindMetadataKey, GetBinds} from '../decorators/Bind';
-import simpleboot from '../index';
+import {SimContext, SimpleBoot} from '../index';
 export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS>{
     // private __isBoot = false;
     constructor(props: P) {
@@ -20,11 +20,11 @@ export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS
     // }
 
     protected boot() {
-        // console.log('boot-->', this.__isBoot)
-        // if (this.__isBoot) {
-        //     return;
-        // }
-
+        const target = this;
+        if (null != target && typeof target === 'object') {
+            const c = target.constructor as any;
+            c.contextType = SimContext;
+        }
         this.componentDidMount = ((origin?: () => void) => {
             return () => {
                 this.beforeComponentDidMount();
@@ -91,9 +91,7 @@ export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS
             })
         }
 
-        // const a = Reflect.getMetadata('design:paramtypes', this)
-        // const b = Reflect.getMetadata('design:paramtypes', constructor)
-        // this.__isBoot = true;
+
     }
 
     private beforeRender() {
@@ -123,8 +121,15 @@ export class SimComponent<P = any, S = any, SS = any> extends Component<P, S, SS
         })
         // console.log('--->', 'beforeComponentWillUnmount')
     }
-    get manager() {
-        console.log('-------mo', simpleboot)
-        return simpleboot ;
+
+    // public getSimContext() {
+    //     return SimContext;
+    // }
+
+    public sb(): SimpleBoot | undefined {
+        if (this.context instanceof SimpleBoot) {
+            const sb = this.context as SimpleBoot;
+            return sb;
+        }
     }
 }

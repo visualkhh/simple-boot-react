@@ -1,8 +1,13 @@
 import {ConstructorType} from './types/Types';
+import React from 'react';
 
 export class SimpleBoot {
     name = 'SimpleBoot';
     private instance = new Map<ConstructorType<any>, any>();
+
+    constructor({name = 'SimpleBoot'}: {name?: string} = {}) {
+        this.name = name;
+    }
 
     get<T>(type: ConstructorType<T>): T {
         if (!this.instance.has(type)) {
@@ -14,6 +19,6 @@ export class SimpleBoot {
     }
 }
 
-const simpleboot = new SimpleBoot();
-export default simpleboot;
+
+export const SimContext = React.createContext(new SimpleBoot({name: 'ggg'}));
 
