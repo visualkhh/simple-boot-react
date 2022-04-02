@@ -126,6 +126,52 @@ class Apps extends SimComponent {
 export default Apps;
 ```
 
+# SimpleBootManager  (Object Manager)
+▼ using object create (singleton)
+```typescript
+export class ProjectService {
+    constructor() {
+        console.log('ProjectService.constructor()');
+    }
+    say() {
+        console.log('Hello from ProjectService');
+    }
+}
+export class UserService {
+    constructor(p: ProjectService) {
+        console.log('UserService.constructor()', p);
+    }
+    say() {
+        console.log('Hello from UserService');
+    }
+}
+```
+```tsx
+class App extends SimComponent {
+    constructor(props: any) {
+        super(props);
+        super.boot();
+    }
+
+    render() {
+        const userService = super.sb().instance(UserService);
+        userService.say();
+        return <div>...</div>;
+    }
+}
+```
+
+▼ create factory register
+```tsx
+import simpleBoot, {SimpleBoot} from 'simple-boot-react'
+import {ProjectService} from './services/ProjectService';
+import {ConstructorType} from 'simple-boot-react/types/Types';
+import {UserService} from './services/UserService';
+simpleBoot.setFactory(UserService, (sb: SimpleBoot, type: ConstructorType<UserService>) => {
+  return new type(sb.instance(ProjectService));
+})
+```
+
 
 <details>
   <summary>enable typescript decorator</summary>

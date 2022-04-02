@@ -1,12 +1,9 @@
-import React, {Component, Props, useRef} from 'react';
+import React from 'react';
 import './App.css';
 import {SimComponent} from 'simple-boot-react/components/SimComponent';
 import {State} from 'simple-boot-react/decorators/State';
 import {Bind} from 'simple-boot-react/decorators/Bind';
-import {PropType} from '../../../src/types/Types';
 import {UserService} from './services/UserService';
-import {ProjectService} from './services/ProjectService';
-import {SimContext, SimpleBoot} from 'simple-boot-react';
 type Subjection = {
     subscribe(callback: (state: any) => void): void;
     unsubscribe(): void;
@@ -25,11 +22,6 @@ class User extends SimComponent {
         super(props);
         super.boot();
         console.log('User constructor', props, this, ref)
-        // console.log('ppp->', props)
-        // props.children?.forEach((child: any) => {
-        //     console.log('------', child);
-        // })
-        // console.table(this, )
         this.subjection.subscribe(()=>{})
     }
     render() {
@@ -75,16 +67,8 @@ class App extends SimComponent {
     }
 
     render() {
-        super.sb()?.get(UserService).say();
+        super.sb().instance(UserService).say();
         console.log('app-redner->', super.sb());
-        // this.manager.get(UserService).say();
-        // this.manager.get(UserService).say();
-        // this.manager.get(ProjectService).say();
-        // const FancyButton = React.forwardRef((props, ref) => (
-        //     <User ref={ref}>asd</User>
-        // ));
-        // const sampleRef = useRef({});
-        // React.createContext({});
         const sampleRef = React.createRef();
         console.log('useRef-->', sampleRef)
         return (
@@ -99,8 +83,4 @@ class App extends SimComponent {
         );
     }
 }
-// console.log('app------1?', App, (App as any).contextType, SimContext);
-// (App as any).contextType = SimContext;
-// console.log('app------2?', App, (App as any).contextType, SimContext);
-// App.contextType = SimContext;
 export default App;
