@@ -1,6 +1,6 @@
 {
   "name": "simple-boot-react",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "react hook, util, http library",
   "types": "index.d.ts",
   "main": "index.js",
