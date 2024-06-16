@@ -29,9 +29,7 @@ npm install --save simple-boot-react
 
 ## hooks
 ### usePromiseState()
-
 manage the state of the promise.
-
 #### Usage
 
 ```tsx
@@ -47,46 +45,86 @@ function Component() {
   </div>)
 }
 ```
+
+#### option
+- usePromiseState<T, RP>: StateHook<T> - T is Promise return type, RP is Factory Parameters type
+  - factory: () => Promise<T> - promise factory
+  - success: (data: T) => void - success callback
+  - error: (error: any) => void - error callback
+  - manual: boolean - if true, the promise is not executed automatically.
+  - signal: (type: 'retry' | 'success' | 'error' | 'loading' | 'ready', data: StateHook<T>) => void - signal callback
+  - executeConfig: { noCacheLoad?: boolean, retry?: number }
+
 ### useDependencyCallBackCleanUp()
-
-useDependencyCallBackCleanUp
-
 #### Usage
 
 ```tsx
 function Component() {
+  usePromiseCleanUp(() => {
+    return new Promise<() => void>((resolve, reject) => {
+      //cleanUp function return 
+      resolve(() => {
+        console.log('cleanUp')
+      })
+    });
+  }, [data])
   return <div></div>
 }
 `````````
 
 ### useNotFalsy()
-
-useNotFalsy
-
 #### Usage
 
 ```tsx
 function Component() {
+  const notFalsyData = useNotFalsy((data) => {
+    return data.length;
+  }, 'data');
+  return <div>{notFalsyData.length}</div>
+}
+```
+
+### useNotFalsyCallBackCleanUp()
+#### Usage
+
+```tsx
+function Component() {
+  useNotFalsyCallBackCleanUp((data) => {
+    return () => {
+      console.log('useNotFalsyCallBackCleanUp cleanUp')
+    }
+  }, data)
   return <div></div>
 }
 ```
 
 ### useNotNullish()
-
-useNotNullish
-
 #### Usage
 
 ```tsx
 function Component() {
-  return <div></div>
+  const notNullishData = useNotNullish((data) => {
+    return data.length;
+  }, 'data');
+  return <div>{notNullishData}</div>
+}
+```
+
+### useNotNullishCallBackCleanUp()
+#### Usage
+
+```tsx
+function Component() {
+  useNotNullishCallBackCleanUp((data) => {
+    return () => {
+      console.log('useNotNullishCallBackCleanUp cleanUp')
+    }
+  }, data)
+  return <div>{notNullishData}</div>
 }
 ```
 
 ### useObservable()
-
-useObservable
-
 #### Usage
 
 ```tsx
@@ -96,9 +134,6 @@ function Component() {
 ```
 
 ### useObservableUnsubscribe()
-
-useObservableUnsubscribe
-
 #### Usage
 
 ```tsx
@@ -113,9 +148,6 @@ function Component() {
 ```
 
 ### usePromise()
-
-usePromise
-
 #### Usage
 
 ```tsx
@@ -125,9 +157,6 @@ function Component() {
 ```
 
 ### usePromiseCleanUp()
-
-usePromiseCleanUp
-
 #### Usage
 
 ```tsx
@@ -137,9 +166,6 @@ function Component() {
 ```
 
 ### usePromiseLazy()
-
-usePromiseLazy
-
 #### Usage
 
 ```tsx
@@ -149,9 +175,6 @@ function Component() {
 ```
 
 ### usePromiseNotNullish()
-
-usePromiseNotNullish
-
 #### Usage
 
 ```tsx
@@ -161,9 +184,6 @@ function Component() {
 ```
 
 ### useWindow()
-
-useWindow
-
 #### Usage
 
 ```tsx

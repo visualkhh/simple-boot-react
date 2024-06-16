@@ -1,6 +1,6 @@
 import { ValidUtils } from '../valid/ValidUtils';
 import { RandomUtils } from '../random/RandomUtils';
-import React, { DependencyList } from 'react';
+import React, { DependencyList, useMemo } from 'react';
 
 export enum StateHookState {
   READY = 'ready',
@@ -63,6 +63,8 @@ const stateHookCache: CatchStorage = ValidUtils.isBrowser()
 // setInterval(()=> {
 //   console.log('CatchStore---->', stateHookCache);
 // }, 1000)
+export type ExecuteConfig = { noCacheLoad?: boolean, retry?: number };
+
 export type CommState<T, RP = void> = {
   readonly state: StateHookState;
   readonly refreshInterval?: number;
@@ -72,9 +74,10 @@ export type CommState<T, RP = void> = {
   readonly setRefreshInterval: (refreshInterval?: number) => { readonly close: () => void };
   readonly setFactory: (factory: (args: RP) => Promise<T> | StateHookCache<T, RP>) => void;
   readonly setFactoryParameter: (factoryParameter: () => RP) => void;
+  readonly lastSuccessData?: T;
+  readonly lastErrorData?: any;
 };
 
-export type ExecuteConfig = { noCacheLoad?: boolean, retry?: number};
 export type CommRefresh<T, RP = void> = {
   readonly refresh: (factory?: (args: RP) => Promise<T> | StateHookCache<T, RP>, config?: ExecuteConfig) => void;
   readonly mutate: (args: RP, config?: ExecuteConfig) => void;
@@ -147,6 +150,8 @@ export type StateHook<T, RP = void> =
   | ErrorState<T, RP>
   | SuccessState<T, RP>;
 
+export type SignalType = 'retry' | 'ready' | 'success' | 'error' | 'loading';
+
 export interface StateHookCacheDataType {
 }
 
@@ -178,6 +183,7 @@ export function usePromiseState<T = unknown, RP = void>(
     maintain?: boolean;
     executeConfig?: ExecuteConfig;
     manual?: boolean;
+    signal?: (type: SignalType, data?: StateHook<T, RP>) => void;
   },
   deps?: DependencyList
 ): StateHook<T, RP> {
@@ -273,7 +279,7 @@ export function usePromiseState<T = unknown, RP = void>(
               state: StateHookState.SUCCESS,
               uuid: RandomUtils.uuid(),
               setData: (data: T) => {
-                setData(prev => ({...prev, data: data, uuid: RandomUtils.uuid()}));
+                setData(prev => ({...prev, lastSuccessData: prev.isSuccess ? prev.data : prev.lastSuccessData, lastErrorData: prev.isError ? prev.data : prev.lastErrorData, data: data, uuid: RandomUtils.uuid()}));
               },
               cacheStorage: stateHookCache,
               data: newResponseData as T,
@@ -340,8 +346,13 @@ export function usePromiseState<T = unknown, RP = void>(
                 execute({factory: factory ?? factoryLocal}, true, config);
               }
             };
-            config?.success?.(newData);
-            setData(newData);
+            setData(prev => {
+              (newData as any).lastSuccessData = prev.isSuccess ? prev.data : prev.lastSuccessData;
+              (newData as any).lastErrorData = prev.isError ? prev.data : prev.lastErrorData;
+              config?.signal?.('success', newData);
+              config?.success?.(newData);
+              return newData
+            });
             return resolve(newData);
           }).finally(() => {
             if (refreshInterval) {
@@ -360,12 +371,13 @@ export function usePromiseState<T = unknown, RP = void>(
         }
       }
 
+      let lastData = data;
       if (maintain === false) {
         const newData: LoadingState<T, RP> = {
           state: StateHookState.LOADING,
           uuid: RandomUtils.uuid(),
           setData: (data: T) => {
-            setData(prev => ({...prev, data: data, uuid: RandomUtils.uuid()}));
+            setData(prev => ({...prev, lastSuccessData: prev.isSuccess ? prev.data : prev.lastSuccessData, lastErrorData: prev.isError ? prev.data : prev.lastErrorData, data: data, uuid: RandomUtils.uuid()}));
           },
           cacheStorage: stateHookCache,
           refreshInterval: refreshInterval,
@@ -386,15 +398,21 @@ export function usePromiseState<T = unknown, RP = void>(
             factoryParameterLocal = factoryParameter;
           }
         };
-        setData(newData);
+        lastData = newData;
+        setData(prev => {
+          (newData as any).lastSuccessData = prev.isSuccess ? prev.data : prev.lastSuccessData;
+          (newData as any).lastErrorData = prev.isError ? prev.data : prev.lastErrorData;
+          config?.signal?.('loading', newData);
+          return newData
+        });
       }
 
 
       //////////
       const retry = executeConfig?.retry ?? 0;
-      const retryFactoryData = retry > 0 ? new Promise<T>(async (resolve, reject)=> {
+      const retryFactoryData = retry > 0 ? new Promise<T>(async (resolve, reject) => {
         for (let i = retry; i > 0; i--) {
-          const factory = i === retry ? factoryData :  factoryDatas.factory(
+          const factory = i === retry ? factoryData : factoryDatas.factory(
             factoryDatas.factoryParameterLocal ? factoryDatas.factoryParameterLocal() : factoryParameterLocal()
           ) as Promise<T>;
 
@@ -405,7 +423,9 @@ export function usePromiseState<T = unknown, RP = void>(
           } catch (e) {
             if (i === 1) {
               reject(e);
+              return;
             }
+            config?.signal?.('retry', lastData);
           }
         }
       }) : factoryData;
@@ -416,7 +436,7 @@ export function usePromiseState<T = unknown, RP = void>(
             data: it,
             uuid: RandomUtils.uuid(),
             setData: (data: T) => {
-              setData(prev => ({...prev, data: data, uuid: RandomUtils.uuid()}));
+              setData(prev => ({...prev, lastSuccessData: prev.isSuccess ? prev.data : prev.lastSuccessData, lastErrorData: prev.isError ? prev.data : prev.lastErrorData, data: data, uuid: RandomUtils.uuid()}));
             },
             cacheStorage: stateHookCache,
             refreshInterval: refreshInterval,
@@ -482,8 +502,13 @@ export function usePromiseState<T = unknown, RP = void>(
               execute({factory: factory ?? factoryLocal}, true, config);
             }
           };
-          setData(newData);
-          config?.success?.(newData);
+          setData(prev => {
+            (newData as any).lastSuccessData = prev.isSuccess ? prev.data : prev.lastSuccessData;
+            (newData as any).lastErrorData = prev.isError ? prev.data : prev.lastErrorData;
+            config?.signal?.('success', newData);
+            config?.success?.(newData);
+            return newData
+          });
           return newData;
         })
         .catch(e => {
@@ -557,8 +582,13 @@ export function usePromiseState<T = unknown, RP = void>(
               execute({factory: factory ?? factoryLocal}, true, config);
             }
           };
-          setData(newData);
-          config?.error?.(newData);
+          setData(prev => {
+            (newData as any).lastSuccessData = prev.isSuccess ? prev.data : prev.lastSuccessData;
+            (newData as any).lastErrorData = prev.isError ? prev.data : prev.lastErrorData;
+            config?.signal?.('error', newData);
+            config?.error?.(newData);
+            return newData;
+          });
           return newData;
         })
         .finally(() => {
@@ -591,7 +621,7 @@ export function usePromiseState<T = unknown, RP = void>(
       state: state,
       uuid: RandomUtils.uuid(),
       setData: (data: T) => {
-        setData(prev => ({...prev, data: data, uuid: RandomUtils.uuid()}));
+        setData(prev => ({...prev, lastSuccessData: prev.isSuccess ? prev.data : undefined, lastErrorData: prev.isError ? prev.data : prev.lastErrorData, data: data, uuid: RandomUtils.uuid()}));
       },
       cacheStorage: stateHookCache,
       refreshInterval: refreshInterval,
@@ -654,7 +684,6 @@ export function usePromiseState<T = unknown, RP = void>(
     };
     return newData;
   });
-
   React.useEffect(() => {
     if (factoryLocal && !config?.manual) {
       execute(
@@ -668,6 +697,8 @@ export function usePromiseState<T = unknown, RP = void>(
       refreshInterval = undefined;
     };
   }, deps ?? []);
+
+  config?.signal?.('ready', data);
   return data;
 }
 

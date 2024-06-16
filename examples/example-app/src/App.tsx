@@ -2,59 +2,83 @@ import React from 'react';
 //@ts-ignore
 import logo from './logo.svg';
 import './App.css';
-import { usePromiseCleanUp, usePromiseState } from 'simple-boot-react';
+import { useNotFalsy, usePromiseCleanUp, usePromiseState, useNotFalsyCallBackCleanUp, useNotNullish, useNotNullishCallBackCleanUp } from 'simple-boot-react';
 
-console.log('main-->', React, usePromiseCleanUp);
-
-// console.log('main-->', React, usePromiseOf);
 function App() {
   const data = usePromiseState({
     factory: () => {
       return new Promise<string>((resolve, reject) => {
-          console.log('iiiiin')
-          // resolve('test');
+        // resolve('test');
         // reject('test' + Math.random());
         setTimeout(() => {
-          console.log('iiiiin')
           // resolve('test');
           if (Math.random() > 0.5) {
-            resolve('test');
+          console.log('success!!')
+            resolve('success!!' + Math.random());
           } else {
-          reject('test' + Math.random());
+          console.log('reject!!')
+            reject('error!!!!!!!' + Math.random());
           }
-        }, ((Math.random() ) * 1000) * 2);
+        }, ((Math.random()) * 1000) * 2);
       });
     },
     success: (e) => {
-      console.log('success-->', e)
+      console.log('success-->', e.data, e.lastSuccessData, e.lastErrorData)
     },
     error: (e) => {
-      console.log('error-->', e)
+      console.log('error-->', e.data, e.lastSuccessData, e.lastErrorData)
       // e.refresh();
-    }, executeConfig: {retry: 5}
+    }, signal: (type, data) => {
+      console.log('signal------------------->', type, data)
+    }, executeConfig: {retry: 4}
   })
 
+  console.log('page-data', data);
 
-  usePromiseCleanUp(() => {
-    return new Promise<() => void>((resolve, reject) => {
-      console.log('usePromiseCleanUp-->')
-      resolve(() => {
-        console.log('cleanUp-->', 'cleanUp')
-      })
-    });
-  }, [])
+  // usePromiseCleanUp(() => {
+  //   return new Promise<() => void>((resolve, reject) => {
+  //     console.log('usePromiseCleanUp-->')
+  //     resolve(() => {
+  //       console.log('cleanUp-->', 'cleanUp')
+  //     })
+  //   });
+  // }, [data])
+
+  // const notFalsyData = useNotFalsy((data) => {
+  //   return data.length;
+  // }, '4zz', 44444);
+  // useNotFalsyCallBackCleanUp((data) => {
+  //   return () => {
+  //     console.log('useNotFalsyCallBackCleanUp cleanUp')
+  //   }
+  // }, data)
+
+  const notNullishData = useNotNullish((data) => {
+    return data.length;
+  }, 'data');
+  useNotNullishCallBackCleanUp((data) => {
+    return () => {
+      console.log('useNotNullishCallBackCleanUp cleanUp')
+    }
+  }, data)
+
   return (
     <div className="App">
       <header className="App-header">
         <div>
-        {data.state}
+          {/*{notNullishData}*/}
+          {/*{notFalsyData}*/}
+        </div>
+        <div>
+          {data.state}
         </div>
         <div>
           <button onClick={e => {
             if (data.isFetchable) {
               data.refreshMaintain();
             }
-          }}>retry</button>
+          }}>retry
+          </button>
         </div>
         <img src={logo} className="App-logo" alt="logo"/>
         <p>
